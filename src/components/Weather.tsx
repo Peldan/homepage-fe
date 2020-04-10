@@ -72,7 +72,6 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
         const stored = JSON.parse(localStorage.getItem(this.symbol.toString()) as string);
         if (stored && stored.lastUpdated) {
             if(shouldBeRefreshed(stored.lastUpdated)){
-                console.log("ska refreshas!! last updated i stored: " + stored.lastUpdated);
                 this.checkWeather();
             } else if(JSON.stringify(stored.currentWeather) != JSON.stringify(this.state.currentWeather)){
                 this.setState(stored);

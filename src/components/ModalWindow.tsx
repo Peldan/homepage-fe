@@ -50,22 +50,21 @@ export class ModalWindow extends React.Component<ModalWindowProps, ModalWindowSt
                 <Modal.Body>
                     <Tabs defaultActiveKey="preset" id="modal-tabs">
                         <Tab eventKey="preset" title="Preset">
-                            <DropdownButton className="mt-2" id="dropdown-basic-button" title="Välj nyhetssida">
+                            <DropdownButton variant="primary" className="mt-4" id="dropdown-basic-button" title="Välj nyhetssida">
                                 {presets}
                             </DropdownButton>
                         </Tab>
                         <Tab eventKey="custom" title="Custom">
-                            <label htmlFor="basic-url">RSS URL</label>
+                            <label className="mt-3" htmlFor="basic-url">RSS URL</label>
                             <InputGroup className="mb-3">
                                 <FormControl onChange={this.handleInput} id="basic-url"/>
                             </InputGroup>
                         </Tab>
                     </Tabs>
-
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={this.props.onClose}>Close</Button>
-                    <Button variant="primary" onClick={() => this.props.onConfirm(this.state.url)}>Save changes</Button>
+                    <Button variant="primary" disabled={this.state.url.length > 5} onClick={() => this.props.onConfirm(this.state.url)}>Save changes</Button>
                 </Modal.Footer>
             </Modal>
         );

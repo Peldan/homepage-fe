@@ -6,6 +6,7 @@ import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/esm/Button";
 import {Header} from "./Header";
 import {Weather} from "./Weather";
+import CardColumns from "react-bootstrap/esm/CardColumns";
 
 
 export interface HomeState {
@@ -58,9 +59,7 @@ export class Home extends React.Component<{}, HomeState> {
         let rows = [];
         for (let i = 1; i <= count; i++) {
             rows.push(
-                <Row key={i} className={"justify-content-center"}>
-                    {this.buildCols(3, i)}
-                </Row>
+                this.buildCols(3, i)
             )
         }
         return rows;
@@ -71,20 +70,21 @@ export class Home extends React.Component<{}, HomeState> {
         return (
             <div>
                 <Header/>
-                <Container>
+                <Container fluid className={"d-flex flex-column"}>
                     <Jumbotron className="text-center" fluid>
                         <Container>
                             <Weather location={this.state.location}/>
                             <h1 className="heading">Simply the best homepage in the world</h1>
-                            <Button className={"mx-1 my-2"} color={"primary"} onClick={this.addRow}>Add row</Button>
-                            <Button className={"my-2"} variant="outline-secondary" onClick={this.deleteRow}>Delete
-                                row</Button>
+                            <Button className={"mx-1 my-2"} color={"primary"} onClick={this.addRow}>Add</Button>
+                            <Button className={"my-2"} variant="outline-secondary" onClick={this.deleteRow}>Delete</Button>
                         </Container>
                     </Jumbotron>
                 </Container>
-                <div className="rsscontainer py-5 bg-light">
-                    {rows}
-                </div>
+                <Container className="py-3 bg-light h-100">
+                    <CardColumns>
+                        {rows}
+                    </CardColumns>
+                </Container>
             </div>
         );
     }

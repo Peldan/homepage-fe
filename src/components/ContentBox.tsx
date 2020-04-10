@@ -1,10 +1,12 @@
 import React from "react";
-import {Button, Pagination, Row, Image} from "react-bootstrap/esm/";
+import {Button, Card, Image, Pagination, Row} from "react-bootstrap/esm/";
 import {ModalWindow} from "./ModalWindow";
 import {RssFeedDto} from "../schema";
-import Col from "react-bootstrap/esm/Col";
 import {shouldBeRefreshed} from "../helper";
-import Navbar from "react-bootstrap/esm/Navbar";
+import CardBody from "react-bootstrap/esm/Card";
+import CardFooter from "react-bootstrap/esm/Card"
+import CardImg from "react-bootstrap/esm/CardImg";
+import Spinner from "react-bootstrap/esm/Spinner";
 
 export interface ContentBoxState {
     showModal: boolean;
@@ -14,6 +16,7 @@ export interface ContentBoxState {
     activePage: number;
     lastUpdated: Date | undefined;
     url: string;
+    fetching: boolean;
 }
 
 
@@ -30,7 +33,8 @@ function defaultState(): ContentBoxState {
         amountOfPages: 0,
         activePage: 1,
         lastUpdated: undefined,
-        url: ""
+        url: "",
+        fetching: false
     }
 }
 
@@ -62,6 +66,7 @@ export class ContentBox extends React.Component<ContentBoxProps, ContentBoxState
 
     getRSSFeed(url: string) {
         this.closeModal();
+        this.setState({fetching: true});
         fetch('https://homepage-be.herokuapp.com/rss', {
             method: "POST",
             body: url
@@ -69,7 +74,13 @@ export class ContentBox extends React.Component<ContentBoxProps, ContentBoxState
             return res.json();
         }).then((json: RssFeedDto[]) => {
             const now = new Date();
-            this.setState({rssFeed: json, amountOfPages: Math.ceil(json.length / 3), lastUpdated: now, url: url}, () => {
+            this.setState({
+                rssFeed: json,
+                amountOfPages: Math.ceil(json.length / 3),
+                lastUpdated: now,
+                url: url,
+                fetching: false
+            }, () => {
                 const toSave: Partial<ContentBoxState> = {
                     rssFeed: json,
                     lastUpdated: now,
@@ -86,8 +97,7 @@ export class ContentBox extends React.Component<ContentBoxProps, ContentBoxState
         if (locallyStoredJson) {
             const savedState: Partial<ContentBoxState> = JSON.parse(locallyStoredJson);
             console.log(savedState);
-            if(savedState.lastUpdated && savedState.url && shouldBeRefreshed(savedState.lastUpdated)){
-                console.log("content old.")
+            if (savedState.lastUpdated && savedState.url && savedState.url.length > 5 && shouldBeRefreshed(savedState.lastUpdated)) {
                 this.getRSSFeed(savedState.url);
             } else {
                 this.setState(prevState => ({
@@ -110,45 +120,62 @@ export class ContentBox extends React.Component<ContentBoxProps, ContentBoxState
         } else {
             index = div * (key - 1);
         }
-        this.setState({currentlyViewing: this.state.rssFeed.slice(index, index + 3), activePage: key});
+        console.log(this.state.rssFeed);
+        try {
+            this.setState({currentlyViewing: this.state.rssFeed.slice(index, index + 3), activePage: key});
+        } catch (Exception){
+            localStorage.clear();
+        }
     }
 
     render() {
         const rss = this.state.currentlyViewing.map((dto) => {
             return (
-                <Row key={dto.url}>
+                <Card key={dto.url} className={"border-0"}>
                     <h1 className="heading"><a href={dto.url}>{dto.title}</a></h1>
-                    <Image src={dto.imgUrl} fluid rounded/>
+                    <CardImg src={dto.imgUrl}/>
                     <p>{dto.description}</p>
-                </Row>
+                </Card>
             )
         });
 
         let pages = [];
         for (let i = 1; i <= this.state.amountOfPages; i++) {
             pages.push(
-                <Pagination.Item key={i} active={this.state.activePage === i} onClick={() => this.populatePage(i)}>
+                <Pagination.Item variant="dark" key={i} active={this.state.activePage === i}
+                                 onClick={() => this.populatePage(i)}>
                     {i}
                 </Pagination.Item>
             )
         }
 
         return (
-            <Col xs={3} md={3} className={"box-shadow mx-5"}>
-                <div className="column-content">
-                    <ModalWindow title="Add RSS feed" isOpen={this.state.showModal} onClose={this.closeModal}
-                                 onConfirm={this.getRSSFeed}/>
-                    {rss.length > 0 ? rss : <h1 className="heading">Empty :(</h1>}
-                    <div className="d-flex justify-content-between align-items-center">
-                        <Pagination>{pages}</Pagination>
-                        {rss.length > 0 ?
-                            <Button className={"mb-2"} variant="danger" size="sm" onClick={this.clearData}>-</Button>
-                            :
-                            <Button className={"mb-2"} variant="primary" size="sm" onClick={this.openModal}>+</Button>
-                        }
-                    </div>
-                </div>
-            </Col>
+            <Card>
+                <CardBody className="card-body column-content border-0">
+                    {this.state.fetching
+                        ?
+                        <Spinner animation="border" role="status">
+                            <span className="sr-only">Loading...</span>
+                        </Spinner>
+                        :
+                        <>
+                            <ModalWindow title="Add RSS feed" isOpen={this.state.showModal} onClose={this.closeModal}
+                                         onConfirm={this.getRSSFeed}/>
+                            {rss.length > 0 ? rss : <h1 className="heading">Empty :(</h1>}
+                        </>
+                    }
+                </CardBody>
+                <CardFooter className={"d-flex justify-content-between align-items-center border-0"}>
+                    <Pagination>{pages}</Pagination>
+                    {rss.length > 0 ?
+                        <Button className={"mb-2"} variant="danger" size="sm"
+                                onClick={this.clearData}>Empty</Button>
+                        :
+                        <Button className={"mb-2"} variant="light" size="sm"
+                                onClick={this.openModal}>Add</Button>
+                    }
+                </CardFooter>
+            </Card>
         )
     }
 }
