@@ -33,6 +33,7 @@ export class Home extends React.Component<{}, HomeState> {
         navigator.geolocation.getCurrentPosition((loc) => {
             this.setState({location: loc});
         });
+        fetch('https://homepage-be.herokuapp.com/wakeup').then(r => console.log("told backend to stop snoozing: " + r.status));
     }
 
     addRow() {

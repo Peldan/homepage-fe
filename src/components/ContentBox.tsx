@@ -3,8 +3,8 @@ import {Button, Pagination, Row, Image} from "react-bootstrap/esm/";
 import {ModalWindow} from "./ModalWindow";
 import {RssFeedDto} from "../schema";
 import Col from "react-bootstrap/esm/Col";
-import {REFRESH_INTERVAL} from "../constants";
 import {shouldBeRefreshed} from "../helper";
+import Navbar from "react-bootstrap/esm/Navbar";
 
 export interface ContentBoxState {
     showModal: boolean;
@@ -57,6 +57,7 @@ export class ContentBox extends React.Component<ContentBoxProps, ContentBoxState
 
     clearData() {
         this.setState(defaultState());
+        localStorage.setItem(String(this.props.id), JSON.stringify({}));
     }
 
     getRSSFeed(url: string) {
@@ -84,7 +85,9 @@ export class ContentBox extends React.Component<ContentBoxProps, ContentBoxState
         const locallyStoredJson = localStorage.getItem(String(this.props.id));
         if (locallyStoredJson) {
             const savedState: Partial<ContentBoxState> = JSON.parse(locallyStoredJson);
+            console.log(savedState);
             if(savedState.lastUpdated && savedState.url && shouldBeRefreshed(savedState.lastUpdated)){
+                console.log("content old.")
                 this.getRSSFeed(savedState.url);
             } else {
                 this.setState(prevState => ({

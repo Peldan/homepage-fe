@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "react-bootstrap/esm/Image";
 import {shouldBeRefreshed} from "../helper";
+import Spinner from "react-bootstrap/esm/Spinner";
 
 export interface WeatherReport {
     time: string,
@@ -65,12 +66,13 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
     }
 
     componentDidUpdate(props: WeatherProps) {
-        const stored = JSON.parse(localStorage.getItem(this.symbol.toString()) as string);
-        if(props.location !== this.props.location){
+        if(props.location !== this.props.location || this.state.lastUpdated && shouldBeRefreshed(this.state.lastUpdated)){
             this.checkWeather();
         }
+        const stored = JSON.parse(localStorage.getItem(this.symbol.toString()) as string);
         if (stored && stored.lastUpdated) {
             if(shouldBeRefreshed(stored.lastUpdated)){
+                console.log("ska refreshas!! last updated i stored: " + stored.lastUpdated);
                 this.checkWeather();
             } else if(JSON.stringify(stored.currentWeather) != JSON.stringify(this.state.currentWeather)){
                 this.setState(stored);
@@ -82,8 +84,16 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
         const currentWeather = this.state.currentWeather;
         return (
             <div className="weather mb-3">
-                <Image className="mb-1" src={process.env.PUBLIC_URL + '/weather.png'} fluid/>
-                {currentWeather.temperature && <p><b>Temperature:</b>{currentWeather.temperature}°C</p>}
+                {currentWeather.temperature
+                    ?
+                    <div>
+                        <Image className="mb-1" src={process.env.PUBLIC_URL + '/weather.png'} fluid/>
+                        <p><b>Temperature:</b>{currentWeather.temperature}°C</p>
+                    </div>
+                    :
+                    <Spinner animation="border" role="status">
+                    <span className="sr-only">Loading...</span>
+                    </Spinner>}
             </div>
         )
     }
