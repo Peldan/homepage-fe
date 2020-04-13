@@ -6,6 +6,3 @@ export function shouldBeRefreshed(lastRefreshed: Date): boolean {
     }
     return Date.now() - (new Date(lastRefreshed)).getMilliseconds() >= REFRESH_INTERVAL;
 }
-
-// stored 13:00
-// 13:06 - 13:01 = 00:05
