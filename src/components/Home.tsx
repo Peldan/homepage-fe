@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Jumbotron from "react-bootstrap/esm/Jumbotron";
 import Container from "react-bootstrap/esm/Container";
-import {ContainerCard} from "./ContainerCard";
+import { ContainerCard } from "./card/ContainerCard";
 import Button from "react-bootstrap/esm/Button";
-import {Header} from "./Header";
-import {Weather} from "./Weather";
+import { Header } from "./Header";
+import { Weather } from "./Weather";
 import CardColumns from "react-bootstrap/esm/CardColumns";
 
 
@@ -13,9 +13,15 @@ export interface HomeState {
     location: GeolocationPosition | undefined
 }
 
+enum VIEW_MODE {
+    CARDS,
+    NORMAL
+}
+
 export const Home = (): JSX.Element => {
     const [rowCount, setRowCount] = useState(1);
     const [location, setLocation] = useState<GeolocationPosition | undefined>(undefined);
+    const [viewMode, setViewMode] = useState(VIEW_MODE.NORMAL);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(loc => setLocation(loc))
@@ -37,7 +43,7 @@ export const Home = (): JSX.Element => {
         for (let i = 1; i <= colCount; i++) {
             const id = row * i;
             cols.push(
-                <ContainerCard key={id} id={id}/>
+                <ContainerCard key={id} id={id} />
             )
         }
         return cols;
@@ -48,7 +54,7 @@ export const Home = (): JSX.Element => {
     }
 
     const deleteRow = () => {
-        if(rowCount > 0){
+        if (rowCount > 0) {
             setRowCount(rowCount - 1);
         }
     }
@@ -56,11 +62,11 @@ export const Home = (): JSX.Element => {
 
     return (
         <div>
-            <Header/>
+            <Header />
             <Container fluid className={"d-flex flex-column"}>
                 <Jumbotron className="text-center" fluid>
                     <Container>
-                        <Weather location={location}/>
+                        <Weather location={location} />
                         <h1 className="heading">Simply the best homepage in the world</h1>
                         <Button className={"mx-1 my-2"} color={"primary"} onClick={addRow}>Add</Button>
                         <Button className={"my-2"} variant="outline-secondary" onClick={deleteRow}>Delete</Button>
@@ -69,7 +75,9 @@ export const Home = (): JSX.Element => {
             </Container>
             <Container className="py-3 bg-light h-100">
                 <CardColumns>
-                    {buildRows(rowCount)}
+                    {
+                       buildRows(rowCount)
+                    }
                 </CardColumns>
             </Container>
         </div>

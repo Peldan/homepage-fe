@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {Button, Card, Pagination} from "react-bootstrap/esm/";
-import {ModalWindow} from "./ModalWindow";
-import {RssFeedDto} from "../schema";
-import {shouldBeRefreshed} from "../helper";
+import {ModalWindow} from "../ModalWindow";
+import {RssFeedDto} from "../../schema";
+import {shouldBeRefreshed} from "../../helper";
 import CardBody from "react-bootstrap/esm/Card";
 import CardFooter from "react-bootstrap/esm/Card"
 import Spinner from "react-bootstrap/esm/Spinner";
 import { RSSItemCardList } from "./RSSItemCardList";
-import { RSSPagination } from "./RSSPagination";
+import { RSSPagination } from "../RSSPagination";
 
 export interface ContainerCardProps {
     id: number,

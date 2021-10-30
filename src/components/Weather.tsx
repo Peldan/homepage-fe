@@ -62,7 +62,6 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
                         localStorage.setItem(this.symbol.toString(), JSON.stringify(toSave));
                     })
                 })
-                .catch(error => console.error(error));
         }
     }
 

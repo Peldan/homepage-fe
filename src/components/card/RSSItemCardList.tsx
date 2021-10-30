@@ -1,5 +1,5 @@
 import React from "react";
-import { RssFeedDto } from "../schema";
+import { RssFeedDto } from "../../schema";
 import { RSSItemCard } from "./RSSItemCard";
 
 export const RSSItemCardList = ({ feed }: { feed: RssFeedDto[] }): JSX.Element => {
