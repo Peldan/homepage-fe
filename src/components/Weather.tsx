@@ -65,7 +65,8 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
         }
     }
 
-    componentDidUpdate(props: WeatherProps) {
+    componentDidUpdate(props: WeatherProps) { //TODO something has changed in the API, now sending requests every ms
+        /*
         if((props.location !== this.props.location) || (this.state.lastUpdated && shouldBeRefreshed(this.state.lastUpdated))){
             this.checkWeather();
         }
@@ -76,13 +77,13 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
             } else if(JSON.stringify(stored.currentWeather) !== JSON.stringify(this.state.currentWeather)){
                 this.setState(stored);
             }
-        }
+        }*/
     }
 
     render() {
-        const currentWeather = this.state.currentWeather;
-        return (
-            <div className="weather mb-3">
+        //const currentWeather = this.state.currentWeather;
+        return ( <></>
+            /*<div className="weather mb-3">
                 {currentWeather.temperature
                     ?
                     <div>
@@ -93,7 +94,7 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
                     <Spinner animation="border" role="status">
                     <span className="sr-only">Loading...</span>
                     </Spinner>}
-            </div>
+            </div>*/
         )
     }
 }
