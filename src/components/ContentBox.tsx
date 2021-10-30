@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Image, Pagination, Row} from "react-bootstrap/esm/";
+import {Button, Card, Pagination} from "react-bootstrap/esm/";
 import {ModalWindow} from "./ModalWindow";
 import {RssFeedDto} from "../schema";
 import {shouldBeRefreshed} from "../helper";
@@ -7,6 +7,7 @@ import CardBody from "react-bootstrap/esm/Card";
 import CardFooter from "react-bootstrap/esm/Card"
 import CardImg from "react-bootstrap/esm/CardImg";
 import Spinner from "react-bootstrap/esm/Spinner";
+
 
 export interface ContentBoxState {
     showModal: boolean;
