@@ -14,7 +14,7 @@ export interface WeatherState {
 }
 
 export interface WeatherProps {
-    location: Position | undefined
+    location: GeolocationPosition | undefined
 }
 
 function defaultState(): WeatherState {
@@ -62,18 +62,19 @@ export class Weather extends React.Component<WeatherProps, WeatherState> {
                         localStorage.setItem(this.symbol.toString(), JSON.stringify(toSave));
                     })
                 })
+                .catch(error => console.error(error));
         }
     }
 
     componentDidUpdate(props: WeatherProps) {
-        if(props.location !== this.props.location || this.state.lastUpdated && shouldBeRefreshed(this.state.lastUpdated)){
+        if((props.location !== this.props.location) || (this.state.lastUpdated && shouldBeRefreshed(this.state.lastUpdated))){
             this.checkWeather();
         }
         const stored = JSON.parse(localStorage.getItem(this.symbol.toString()) as string);
         if (stored && stored.lastUpdated) {
             if(shouldBeRefreshed(stored.lastUpdated)){
                 this.checkWeather();
-            } else if(JSON.stringify(stored.currentWeather) != JSON.stringify(this.state.currentWeather)){
+            } else if(JSON.stringify(stored.currentWeather) !== JSON.stringify(this.state.currentWeather)){
                 this.setState(stored);
             }
         }

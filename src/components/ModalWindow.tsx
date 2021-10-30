@@ -1,10 +1,10 @@
 import {Modal} from "react-bootstrap";
 import React from "react";
 import Button from "react-bootstrap/esm/Button";
-import {FormControl, InputGroup, Tab, Dropdown} from "react-bootstrap/esm";
+import {FormControl, InputGroup, Tab} from "react-bootstrap/esm";
 import Tabs from "react-bootstrap/esm/Tabs";
 import DropdownButton from "react-bootstrap/esm/DropdownButton";
-import {RSS_PRESET, RSS_PRESETS} from "../constants";
+import {RSS_PRESETS} from "../constants";
 import DropdownItem from "react-bootstrap/esm/DropdownItem";
 
 export interface ModalWindowProps {
@@ -34,9 +34,9 @@ export class ModalWindow extends React.Component<ModalWindowProps, ModalWindowSt
 
     render() {
 
-        const presets = RSS_PRESETS.map((preset) => {
+        const presets = RSS_PRESETS.map((preset, i) => {
             return (
-                <DropdownItem onClick={() => this.props.onConfirm(preset.url)}>
+                <DropdownItem key={i} onClick={() => this.props.onConfirm(preset.url)}>
                     {preset.title}
                 </DropdownItem>
             )
