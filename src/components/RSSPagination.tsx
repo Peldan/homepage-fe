@@ -9,7 +9,7 @@ export const RSSPagination = ({amountOfPages, onPageSelected}: {
     let pages = [];
     for (let i = 1; i <= amountOfPages; i++) {
         pages.push(
-            <Pagination.Item variant="dark" key={i} active={activePage === i}
+            <Pagination.Item key={i} active={activePage === i}
                              onClick={() => {
                                  setActivePage(i);
                                  onPageSelected(i);

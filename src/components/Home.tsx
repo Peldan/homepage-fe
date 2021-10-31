@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Jumbotron from "react-bootstrap/esm/Jumbotron";
 import Container from "react-bootstrap/esm/Container";
 import { ContainerCard } from "./card/ContainerCard";
 import Button from "react-bootstrap/esm/Button";
 import { Header } from "./Header";
 import { Weather } from "./Weather";
-import CardColumns from "react-bootstrap/esm/CardColumns";
-
+import Masonry from 'react-masonry-css'
+import { NormalView } from "./NormalView";
 
 export interface HomeState {
     rowCount: number;
@@ -59,26 +58,35 @@ export const Home = (): JSX.Element => {
         }
     }
 
-
-    return (
+    return ( //TODO replace "Mode" button with an actual toggle
         <div>
             <Header />
             <Container fluid className={"d-flex flex-column"}>
-                <Jumbotron className="text-center" fluid>
+                <div className="container-fluid p-5 text-light text-center">
                     <Container>
                         <Weather location={location} />
-                        <h1 className="heading">Simply the best homepage in the world</h1>
+                        <h1 className="heading" style={{ color: "#212529" }}>Simply the best homepage in the world</h1>
                         <Button className={"mx-1 my-2"} color={"primary"} onClick={addRow}>Add</Button>
                         <Button className={"my-2"} variant="outline-secondary" onClick={deleteRow}>Delete</Button>
+                        <br />
+                        <Button className={"my-2"} variant="outline-secondary"
+                            onClick={() =>
+                                setViewMode(viewMode === VIEW_MODE.NORMAL ? VIEW_MODE.CARDS : VIEW_MODE.NORMAL)}>
+                            Switch mode
+                        </Button>
                     </Container>
-                </Jumbotron>
+                </div>
             </Container>
             <Container className="py-3 bg-light h-100">
-                <CardColumns>
-                    {
-                       buildRows(rowCount)
-                    }
-                </CardColumns>
+                {viewMode === VIEW_MODE.CARDS
+                    ? <Masonry
+                        breakpointCols={3}
+                        className="masonry-grid"
+                        columnClassName="masonry-col">
+                        {buildRows(rowCount)}
+                    </Masonry>
+                    : <NormalView />}
+
             </Container>
         </div>
     )
