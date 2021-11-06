@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button, Card, Pagination } from "react-bootstrap/esm/";
 import { ModalWindow } from "../ModalWindow";
 import { RssFeedDto } from "../../schema";
-import { shouldBeRefreshed } from "../../helper";
 import CardBody from "react-bootstrap/esm/Card";
 import CardFooter from "react-bootstrap/esm/Card"
 import Spinner from "react-bootstrap/esm/Spinner";
 import { RSSItemCardList } from "./RSSItemCardList";
 import { RSSPagination } from "../RSSPagination";
 import { fetchRSS } from "../../service/rss-service";
+import { useLocalStorageState } from "../useLocalStorage";
 
 export interface ContainerCardProps {
     id: number,
@@ -16,20 +16,14 @@ export interface ContainerCardProps {
     onRSSFeedDeleted: (id: number) => void,
 }
 
-interface PersistedState {
-    RSSFeed: RssFeedDto[],
-    lastUpdated: Date | undefined,
-    url: string,
-}
-
 const getIndexForPage = (page: number, amountOfPages: number, amountOfItems: number) => {
     const div = Math.floor(amountOfItems / amountOfPages);
     const mod = amountOfItems % amountOfPages;
     let index: number;
-    if (key >= (amountOfPages - mod)) {
-        index = (div + 1) * (key - 1);
+    if (page >= (amountOfPages - mod)) {
+        index = (div + 1) * (page - 1);
     } else {
-        index = div * (key - 1);
+        index = div * (page - 1);
     }
     return index;
 }
@@ -37,11 +31,9 @@ const getIndexForPage = (page: number, amountOfPages: number, amountOfItems: num
 export const ContainerCard = ({ id, onRSSFeedAdded, onRSSFeedDeleted }: ContainerCardProps) => {
 
     const [showModal, setShowModal] = useState(false);
-    const [RSSFeed, setRSSFeed] = useState<RssFeedDto[]>([]);
+    const [RSSFeed, setRSSFeed] = useLocalStorageState<RssFeedDto[]>(String(id), []);
     const [currentlyViewing, setCurrentlyViewing] = useState<RssFeedDto[]>([]);
     const [amountOfPages, setAmountOfPages] = useState(0);
-    const [lastUpdated, setLastUpdated] = useState<Date | undefined>(undefined);
-    const [url, setUrl] = useState("");
     const [fetching, setFetching] = useState(false);
 
     const isFirstRender = useRef(true);
@@ -51,15 +43,12 @@ export const ContainerCard = ({ id, onRSSFeedAdded, onRSSFeedDeleted }: Containe
         setFetching(true);
         fetchRSS(url)
             .then((json: RssFeedDto[]) => {
-                const now = new Date();
                 setRSSFeed(json);
                 setAmountOfPages(Math.ceil(json.length / 3));
-                setLastUpdated(now);
-                setUrl(url);
                 setFetching(false);
                 onRSSFeedAdded(id, json);
             })
-    }, [onRSSFeedAdded, id]);
+    }, [onRSSFeedAdded, setRSSFeed, id]);
 
     const populatePage = useCallback((key: number) => {
         const index = getIndexForPage(key, amountOfPages, RSSFeed.length);
@@ -74,15 +63,8 @@ export const ContainerCard = ({ id, onRSSFeedAdded, onRSSFeedDeleted }: Containe
         if (isFirstRender.current) {
             isFirstRender.current = false;
         }
-        const toSave: PersistedState = {
-            RSSFeed: RSSFeed,
-            lastUpdated,
-            url,
-        };
-        console.log("persisting to storage")
-        localStorage.setItem(String(id), JSON.stringify(toSave));
         populatePage(1);
-    }, [RSSFeed, lastUpdated, url, id, populatePage]);
+    }, [RSSFeed, populatePage]);
 
     useEffect(() => {
         setAmountOfPages(Math.ceil(RSSFeed.length / 3));
@@ -92,29 +74,10 @@ export const ContainerCard = ({ id, onRSSFeedAdded, onRSSFeedDeleted }: Containe
         populatePage(1);
     }, [amountOfPages, populatePage])
 
-    useEffect(() => {
-        const locallyStoredJson = localStorage.getItem(String(id));
-        console.log("1")
-        if (locallyStoredJson) {
-            console.log("finns json")
-            const savedState: PersistedState = JSON.parse(locallyStoredJson);
-            console.log(JSON.stringify(savedState));
-            if (savedState.lastUpdated && savedState.url && savedState.url.length > 5 && shouldBeRefreshed(savedState.lastUpdated)) {
-                getRSSFeed(savedState.url);
-            } else {
-                setLastUpdated(savedState.lastUpdated);
-                setRSSFeed(savedState.RSSFeed);
-                setUrl(savedState.url);
-            }
-        }
-    }, [id, getRSSFeed])
-
     const resetState = (): void => {
         setShowModal(false);
         setRSSFeed([]);
         setCurrentlyViewing([]);
-        setLastUpdated(undefined);
-        setUrl("");
         setFetching(false);
         onRSSFeedDeleted(id);
     }
@@ -149,7 +112,7 @@ export const ContainerCard = ({ id, onRSSFeedAdded, onRSSFeedDeleted }: Containe
                 }
             </CardBody>
             <CardFooter className={"d-flex justify-content-between align-items-center border-0"}>
-                <Pagination>
+                <Pagination className="flex-wrap">
                     <RSSPagination amountOfPages={amountOfPages} onPageSelected={populatePage} />
                 </Pagination>
                 {currentlyViewing.length > 0 ?

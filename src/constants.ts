@@ -8,6 +8,6 @@ export interface RSS_PRESET {
 export const RSS_PRESETS: RSS_PRESET[] = [
     {title: "Aftonbladet", url: "https://rss.aftonbladet.se/rss2/small/pages/sections/nyheter/"},
     {title: "SVT Nyheter", url: "http://www.svt.se/nyheter/rss.xml"},
-    {title: "SvD", url: "http://www.svd.se/?service=rss"},
+    {title: "SvD", url: "https://www.svd.se/feed/articles.rss"},
     {title: "Dagens Industri", url: "https://digital.di.se/rss"},
 ];

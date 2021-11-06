@@ -7,6 +7,7 @@ import { Weather } from "./Weather";
 import Masonry from 'react-masonry-css'
 import { NormalView } from "./NormalView";
 import { RssFeedDto } from "../schema";
+import { useLocalStorageState } from "./useLocalStorage";
 
 export interface HomeState {
     rowCount: number;
@@ -21,7 +22,7 @@ enum VIEW_MODE {
 export const Home = (): JSX.Element => {
     const [rowCount, setRowCount] = useState(1);
     const [location, setLocation] = useState<GeolocationPosition | undefined>(undefined);
-    const [viewMode, setViewMode] = useState(VIEW_MODE.NORMAL);
+    const [viewMode, setViewMode] = useLocalStorageState("viewMode", VIEW_MODE.CARDS)
     const [allRSSItems, setAllRSSItems] = useState<Map<number, RssFeedDto[]>>(new Map());
 
     useEffect(() => {
@@ -36,7 +37,7 @@ export const Home = (): JSX.Element => {
     const onRssFeedDeleted = useCallback((id) => {
         setAllRSSItems(prev => new Map(Array.from(prev).filter(entry => entry[0] !== id)));
     }, [])
-
+    
     const buildRows = (rowCount: number) => {
         let rows = [];
         for (let i = 1; i <= rowCount; i++) {
