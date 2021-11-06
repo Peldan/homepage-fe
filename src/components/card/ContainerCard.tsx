@@ -12,6 +12,8 @@ import { fetchRSS } from "../../service/rss-service";
 
 export interface ContainerCardProps {
     id: number,
+    onRSSFeedAdded: (id: number, rssFeed: RssFeedDto[]) => void,
+    onRSSFeedDeleted: (id: number) => void,
 }
 
 interface PersistedState {
@@ -20,7 +22,19 @@ interface PersistedState {
     url: string,
 }
 
-export const ContainerCard = ({ id }: ContainerCardProps) => {
+const getIndexForPage = (page: number, amountOfPages: number, amountOfItems: number) => {
+    const div = Math.floor(amountOfItems / amountOfPages);
+    const mod = amountOfItems % amountOfPages;
+    let index: number;
+    if (key >= (amountOfPages - mod)) {
+        index = (div + 1) * (key - 1);
+    } else {
+        index = div * (key - 1);
+    }
+    return index;
+}
+
+export const ContainerCard = ({ id, onRSSFeedAdded, onRSSFeedDeleted }: ContainerCardProps) => {
 
     const [showModal, setShowModal] = useState(false);
     const [RSSFeed, setRSSFeed] = useState<RssFeedDto[]>([]);
@@ -43,18 +57,12 @@ export const ContainerCard = ({ id }: ContainerCardProps) => {
                 setLastUpdated(now);
                 setUrl(url);
                 setFetching(false);
+                onRSSFeedAdded(id, json);
             })
-    }, []);
+    }, [onRSSFeedAdded, id]);
 
     const populatePage = useCallback((key: number) => {
-        const div = Math.floor(RSSFeed.length / amountOfPages);
-        const mod = RSSFeed.length % amountOfPages;
-        let index: number;
-        if (key >= (amountOfPages - mod)) {
-            index = (div + 1) * (key - 1);
-        } else {
-            index = div * (key - 1);
-        }
+        const index = getIndexForPage(key, amountOfPages, RSSFeed.length);
         try {
             setCurrentlyViewing(RSSFeed.slice(index, index + 3));
         } catch (Exception) {
@@ -71,6 +79,7 @@ export const ContainerCard = ({ id }: ContainerCardProps) => {
             lastUpdated,
             url,
         };
+        console.log("persisting to storage")
         localStorage.setItem(String(id), JSON.stringify(toSave));
         populatePage(1);
     }, [RSSFeed, lastUpdated, url, id, populatePage]);
@@ -85,8 +94,11 @@ export const ContainerCard = ({ id }: ContainerCardProps) => {
 
     useEffect(() => {
         const locallyStoredJson = localStorage.getItem(String(id));
+        console.log("1")
         if (locallyStoredJson) {
+            console.log("finns json")
             const savedState: PersistedState = JSON.parse(locallyStoredJson);
+            console.log(JSON.stringify(savedState));
             if (savedState.lastUpdated && savedState.url && savedState.url.length > 5 && shouldBeRefreshed(savedState.lastUpdated)) {
                 getRSSFeed(savedState.url);
             } else {
@@ -104,6 +116,7 @@ export const ContainerCard = ({ id }: ContainerCardProps) => {
         setLastUpdated(undefined);
         setUrl("");
         setFetching(false);
+        onRSSFeedDeleted(id);
     }
 
     const openModal = (): void => {

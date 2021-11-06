@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Container from "react-bootstrap/esm/Container";
 import { ContainerCard } from "./card/ContainerCard";
 import Button from "react-bootstrap/esm/Button";
@@ -6,6 +6,7 @@ import { Header } from "./Header";
 import { Weather } from "./Weather";
 import Masonry from 'react-masonry-css'
 import { NormalView } from "./NormalView";
+import { RssFeedDto } from "../schema";
 
 export interface HomeState {
     rowCount: number;
@@ -21,10 +22,19 @@ export const Home = (): JSX.Element => {
     const [rowCount, setRowCount] = useState(1);
     const [location, setLocation] = useState<GeolocationPosition | undefined>(undefined);
     const [viewMode, setViewMode] = useState(VIEW_MODE.NORMAL);
+    const [allRSSItems, setAllRSSItems] = useState<Map<number, RssFeedDto[]>>(new Map());
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(loc => setLocation(loc))
         fetch('https://homepage-be.herokuapp.com/wakeup').then(r => console.log("told backend to stop snoozing: " + r.status));
+    }, [])
+
+    const onRssFeedAdded = useCallback((id: number, rss: RssFeedDto[]) => {
+        setAllRSSItems(prev => new Map(prev.set(id, rss)))
+    }, [])
+
+    const onRssFeedDeleted = useCallback((id) => {
+        setAllRSSItems(prev => new Map(Array.from(prev).filter(entry => entry[0] !== id)));
     }, [])
 
     const buildRows = (rowCount: number) => {
@@ -42,7 +52,11 @@ export const Home = (): JSX.Element => {
         for (let i = 1; i <= colCount; i++) {
             const id = row * i;
             cols.push(
-                <ContainerCard key={id} id={id} />
+                <ContainerCard
+                    onRSSFeedAdded={onRssFeedAdded}
+                    onRSSFeedDeleted={onRssFeedDeleted}
+                    key={id}
+                    id={id} />
             )
         }
         return cols;
@@ -66,8 +80,12 @@ export const Home = (): JSX.Element => {
                     <Container>
                         <Weather location={location} />
                         <h1 className="heading" style={{ color: "#212529" }}>Simply the best homepage in the world</h1>
-                        <Button className={"mx-1 my-2"} color={"primary"} onClick={addRow}>Add</Button>
-                        <Button className={"my-2"} variant="outline-secondary" onClick={deleteRow}>Delete</Button>
+                        {viewMode === VIEW_MODE.CARDS &&
+                            <>
+                                <Button className={"mx-1 my-2"} color={"primary"} onClick={addRow}>Add</Button>
+                                <Button className={"my-2"} variant="outline-secondary" onClick={deleteRow}>Delete</Button>
+                            </>
+                        }
                         <br />
                         <Button className={"my-2"} variant="outline-secondary"
                             onClick={() =>
@@ -77,7 +95,7 @@ export const Home = (): JSX.Element => {
                     </Container>
                 </div>
             </Container>
-            <Container className="py-3 bg-light h-100">
+            <Container className={`py-3 ${viewMode === VIEW_MODE.CARDS && 'bg-light'} h-100`}>
                 {viewMode === VIEW_MODE.CARDS
                     ? <Masonry
                         breakpointCols={3}
@@ -85,7 +103,7 @@ export const Home = (): JSX.Element => {
                         columnClassName="masonry-col">
                         {buildRows(rowCount)}
                     </Masonry>
-                    : <NormalView />}
+                    : <NormalView rssItems={Array.from(allRSSItems.values())}/>}
 
             </Container>
         </div>
